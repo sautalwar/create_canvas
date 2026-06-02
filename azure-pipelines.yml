@@ -1,6 +1,3 @@
-# Node.js / TypeScript pipeline for sautalwar/create_canvas
-# Validates PRs and merges - optimized for self-hosted Windows agent
-
 trigger:
   branches:
     include:
@@ -17,16 +14,14 @@ pool:
   name: Default
 
 steps:
-  - powershell: |
-      Write-Host "Node: $(node --version)"
-      Write-Host "npm: $(npm --version)"
+  - script: node --version && npm --version
     displayName: 'Environment Check'
 
-  - powershell: npm ci --prefer-offline
+  - script: npm ci --prefer-offline
     displayName: 'Install dependencies'
 
-  - powershell: npm run build
+  - script: npm run build
     displayName: 'Build'
 
-  - powershell: npm test -- --runInBand --forceExit
+  - script: npm test -- --runInBand --forceExit
     displayName: 'Test'
