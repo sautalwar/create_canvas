@@ -16,12 +16,16 @@ pool:
 steps:
   - script: node --version && npm --version
     displayName: 'Environment Check'
+    failOnStderr: false
 
   - script: npm ci --prefer-offline
     displayName: 'Install dependencies'
+    failOnStderr: false
 
   - script: npm run build
     displayName: 'Build'
+    failOnStderr: false
 
   - script: npm test -- --runInBand --forceExit
     displayName: 'Test'
+    failOnStderr: false
