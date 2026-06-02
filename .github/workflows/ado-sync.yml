@@ -1,0 +1,63 @@
+name: Sync GitHub Issues to Azure DevOps
+
+on:
+  issues:
+    types: [opened, edited, closed, reopened]
+
+permissions:
+  issues: write
+
+env:
+  ADO_ORG: https://dev.azure.com/YOUR_ORG     # Replace with your ADO org URL
+  ADO_PROJECT: YOUR_PROJECT                      # Replace with your ADO project name
+  ADO_PAT: ${{ secrets.ADO_PAT }}               # Store PAT in GitHub Secrets
+
+jobs:
+  sync-to-ado:
+    runs-on: ubuntu-latest
+    if: contains(github.event.issue.labels.*.name, 'sync-ado')
+
+    steps:
+      - name: Sync Issue to ADO Work Item
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.payload.issue;
+            const action = context.payload.action;
+            const adoOrg = process.env.ADO_ORG;
+            const adoProject = process.env.ADO_PROJECT;
+            const adoPat = process.env.ADO_PAT;
+
+            const headers = {
+              'Content-Type': 'application/json-patch+json',
+              'Authorization': `Basic ${Buffer.from(`:${adoPat}`).toString('base64')}`
+            };
+
+            if (action === 'opened') {
+              // Create a new ADO work item linked to this GitHub issue
+              const body = [
+                { op: 'add', path: '/fields/System.Title', value: issue.title },
+                { op: 'add', path: '/fields/System.Description', value: `${issue.body}\n\n---\nLinked GitHub Issue: ${issue.html_url}` },
+                { op: 'add', path: '/fields/System.Tags', value: 'GitHub;automated' },
+              ];
+
+              const response = await fetch(
+                `${adoOrg}/${adoProject}/_apis/wit/workitems/$Product%20Backlog%20Item?api-version=7.1`,
+                { method: 'POST', headers, body: JSON.stringify(body) }
+              );
+
+              if (response.ok) {
+                const workItem = await response.json();
+                // Comment on the GitHub issue with the ADO link
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issue.number,
+                  body: `✅ Azure DevOps work item created: [AB#${workItem.id}](${adoOrg}/${adoProject}/_workitems/edit/${workItem.id})`
+                });
+              }
+            }
+
+            if (action === 'closed') {
+              core.info('Issue closed — ADO work item should be updated via Azure Boards GitHub App');
+            }

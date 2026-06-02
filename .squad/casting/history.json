@@ -1,0 +1,9 @@
+[
+  {
+    "assignment_id": "brandsafway-demo-001",
+    "universe": "the-usual-suspects",
+    "created_at": "2026-06-01T18:57:00Z",
+    "agents": ["Keaton", "Fenster", "McManus", "Hockney"],
+    "reason": "Initial team cast for Brandsafway ADO+GitHub demo project"
+  }
+]
