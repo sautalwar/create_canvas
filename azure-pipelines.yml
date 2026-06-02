@@ -14,7 +14,7 @@ pr:
       - main
 
 pool:
-  vmImage: ubuntu-latest
+  name: Default
 
 variables:
   NODE_VERSION: '20.x'
@@ -25,37 +25,35 @@ steps:
     inputs:
       versionSpec: $(NODE_VERSION)
 
-  - script: |
-      echo "Repo contents:"
-      ls -la
-      echo "Node: $(node --version)"
-      echo "npm:  $(npm --version)"
+  - powershell: |
+      Write-Host "Repo contents:"
+      Get-ChildItem -Force
+      Write-Host "Node: $(node --version)"
+      Write-Host "npm:  $(npm --version)"
     displayName: 'Diagnostics'
 
-  - script: |
-      if [ -f package-lock.json ]; then
-        echo "Lockfile found -> npm ci"
+  - powershell: |
+      if (Test-Path package-lock.json) {
         npm ci
-      elif [ -f package.json ]; then
-        echo "No lockfile -> npm install"
+      } elseif (Test-Path package.json) {
         npm install
-      else
-        echo "No package.json yet -> skipping install"
-      fi
+      } else {
+        Write-Host "No package.json yet -> skipping install"
+      }
     displayName: 'Install dependencies'
 
-  - script: |
-      if [ -f package.json ] && npm run | grep -q "^  build"; then
+  - powershell: |
+      if ((Test-Path package.json) -and (npm run | Select-String -Quiet '^  build')) {
         npm run build
-      else
-        echo "No 'build' script yet -> skipping"
-      fi
+      } else {
+        Write-Host "No 'build' script yet -> skipping"
+      }
     displayName: 'Build'
 
-  - script: |
-      if [ -f package.json ] && npm run | grep -q "^  test"; then
+  - powershell: |
+      if ((Test-Path package.json) -and (npm run | Select-String -Quiet '^  test')) {
         npm test
-      else
-        echo "No 'test' script yet -> skipping"
-      fi
+      } else {
+        Write-Host "No 'test' script yet -> skipping"
+      }
     displayName: 'Test'
