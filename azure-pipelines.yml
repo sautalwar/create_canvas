@@ -11,13 +11,15 @@ pr:
       - master
 
 pool:
-  name: Default
+  vmImage: 'windows-latest'
 
 steps:
-  - script: node --version && npm --version
-    displayName: 'Environment Check'
+  - task: NodeTool@0
+    inputs:
+      versionSpec: '20.x'
+    displayName: 'Install Node.js'
 
-  - script: npm ci --prefer-offline
+  - script: npm ci
     displayName: 'Install dependencies'
 
   - script: npm run build
