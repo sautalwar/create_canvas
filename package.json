@@ -37,6 +37,9 @@
       "**/tests/**/*.test.ts"
     ],
     "collectCoverage": true,
-    "coverageDirectory": "coverage"
+    "coverageDirectory": "coverage",
+    "transformIgnorePatterns": [
+      "node_modules/(?!uuid)/"
+    ]
   }
 }
