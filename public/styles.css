@@ -1,0 +1,301 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  color: #0f172a;
+  background: #f8fafc;
+}
+
+.hero {
+  background: linear-gradient(135deg, #0f172a, #2563eb);
+  color: #fff;
+  padding: 1.5rem 1.5rem 4rem;
+}
+
+.topbar,
+.section-heading,
+.hero-content,
+.layout,
+.detail-card,
+.cart-item {
+  display: flex;
+  gap: 1rem;
+}
+
+.topbar,
+.section-heading,
+.hero-content,
+.layout {
+  justify-content: space-between;
+}
+
+.topbar,
+.section-heading,
+.hero-content,
+.detail-card,
+.cart-item {
+  align-items: center;
+}
+
+.brand,
+h1,
+h2,
+h3 {
+  margin: 0;
+}
+
+.brand {
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.cart-link,
+.button {
+  text-decoration: none;
+}
+
+.cart-link {
+  color: #fff;
+  font-weight: 700;
+}
+
+.hero-content {
+  align-items: end;
+  margin: 3rem auto 0;
+  max-width: 1200px;
+}
+
+.hero-content > * {
+  flex: 1;
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.72rem;
+  font-weight: 700;
+  opacity: 0.75;
+}
+
+h1 {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  line-height: 1.05;
+  margin-top: 0.75rem;
+}
+
+.hero-copy {
+  max-width: 40rem;
+  color: rgba(255, 255, 255, 0.86);
+}
+
+.hero-actions,
+.category-nav,
+.detail-sizes {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.button {
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  display: inline-flex;
+  font-weight: 700;
+  justify-content: center;
+  padding: 0.85rem 1.25rem;
+}
+
+.button.primary {
+  background: #111827;
+  color: #fff;
+}
+
+.button.secondary,
+.category-pill,
+.size-pill {
+  background: rgba(255, 255, 255, 0.14);
+  color: inherit;
+}
+
+.hero-card,
+.filters,
+.catalog-panel,
+.detail-section,
+.cart-list,
+.product-card,
+.cart-item {
+  background: #fff;
+  border-radius: 1.25rem;
+  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.08);
+}
+
+.hero-card {
+  color: #0f172a;
+  padding: 1.5rem;
+  max-width: 18rem;
+  margin-left: auto;
+}
+
+.page-shell {
+  margin: -2rem auto 0;
+  max-width: 1200px;
+  padding: 0 1.5rem 3rem;
+}
+
+.section {
+  margin-top: 2rem;
+}
+
+.compact {
+  align-items: end;
+}
+
+.category-nav {
+  justify-content: flex-end;
+}
+
+.category-pill,
+.size-pill {
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  color: #0f172a;
+  padding: 0.5rem 0.85rem;
+}
+
+.layout {
+  align-items: start;
+}
+
+.filters {
+  min-width: 17rem;
+  padding: 1.5rem;
+  flex-direction: column;
+}
+
+.filters label {
+  color: #475569;
+  display: block;
+  font-size: 0.95rem;
+  margin-top: 1rem;
+}
+
+.filters input,
+.filters select {
+  border: 1px solid #cbd5e1;
+  border-radius: 0.75rem;
+  display: block;
+  margin-top: 0.35rem;
+  padding: 0.8rem;
+  width: 100%;
+}
+
+.catalog-panel {
+  flex: 1;
+  padding: 1.5rem;
+}
+
+.catalog-summary {
+  color: #475569;
+  margin: 0;
+}
+
+.product-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  margin-top: 1rem;
+}
+
+.product-card {
+  overflow: hidden;
+}
+
+.product-card img,
+.detail-gallery img {
+  display: block;
+  width: 100%;
+}
+
+.product-card-body,
+.detail-copy,
+.cart-item {
+  padding: 1rem 1.1rem 1.2rem;
+}
+
+.product-card-body p,
+.detail-copy p {
+  color: #475569;
+}
+
+.product-card-footer,
+.cart-item {
+  justify-content: space-between;
+}
+
+.detail-section {
+  padding: 1.5rem;
+}
+
+.detail-card {
+  align-items: start;
+}
+
+.detail-gallery {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  width: min(100%, 420px);
+}
+
+.detail-copy {
+  flex: 1;
+}
+
+.cart-list {
+  padding: 1rem;
+}
+
+.cart-item {
+  margin-top: 0.75rem;
+}
+
+.cart-item:first-child {
+  margin-top: 0;
+}
+
+.cart-item img {
+  border-radius: 1rem;
+  width: 110px;
+}
+
+.cart-empty {
+  color: #64748b;
+  margin: 0;
+  padding: 1rem;
+}
+
+@media (max-width: 900px) {
+  .hero-content,
+  .layout,
+  .detail-card,
+  .cart-item {
+    flex-direction: column;
+  }
+
+  .hero-card,
+  .filters {
+    margin-left: 0;
+    max-width: none;
+    width: 100%;
+  }
+
+  .section-heading,
+  .compact {
+    align-items: start;
+    flex-direction: column;
+  }
+}

@@ -1,10 +1,6 @@
-import express from 'express';
-import routes from '../src/routes';
+import { createApp } from '../src/app';
 
 // Create a fresh app instance for testing
 export function createTestApp() {
-  const app = express();
-  app.use(express.json());
-  app.use('/api', routes);
-  return app;
+  return createApp();
 }
