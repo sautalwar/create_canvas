@@ -20,6 +20,8 @@ app.get('/', (_req, res) => {
       'POST   /api/items',
       'PUT    /api/items/:id',
       'DELETE /api/items/:id',
+      'DELETE /api/inventory/:id',
+      'GET    /api/inventory/search',
     ],
   });
 });
