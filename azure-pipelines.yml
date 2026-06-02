@@ -1,7 +1,5 @@
 # Node.js / TypeScript pipeline for sautalwar/create_canvas
-# Starter: safe to run on an empty or early-stage repo.
-# Each build/test step is guarded so it skips gracefully until the
-# matching npm script exists, then starts doing real work automatically.
+# Validates PRs and merges - optimized for self-hosted Windows agent
 
 trigger:
   branches:
@@ -18,39 +16,17 @@ pr:
 pool:
   name: Default
 
-variables:
-  NODE_VERSION: '20.x'
-
 steps:
   - powershell: |
-      Write-Host "Repo contents:"
-      Get-ChildItem -Force
-      try { Write-Host "Node: $(node --version)" } catch { Write-Host "Node not installed on agent" }
-      try { Write-Host "npm:  $(npm --version)" } catch { Write-Host "npm not installed" }
-    displayName: 'Diagnostics'
+      Write-Host "Node: $(node --version)"
+      Write-Host "npm: $(npm --version)"
+    displayName: 'Environment Check'
 
-  - powershell: |
-      if (Test-Path package-lock.json) {
-        npm ci
-      } elseif (Test-Path package.json) {
-        npm install
-      } else {
-        Write-Host "No package.json yet -> skipping install"
-      }
+  - powershell: npm ci --prefer-offline
     displayName: 'Install dependencies'
 
-  - powershell: |
-      if ((Test-Path package.json) -and (npm run | Select-String -Quiet '^  build')) {
-        npm run build
-      } else {
-        Write-Host "No 'build' script yet -> skipping"
-      }
+  - powershell: npm run build
     displayName: 'Build'
 
-  - powershell: |
-      if ((Test-Path package.json) -and (npm run | Select-String -Quiet '^  test')) {
-        npm test -- --runInBand
-      } else {
-        Write-Host "No 'test' script yet -> skipping"
-      }
+  - powershell: npm test -- --runInBand --forceExit
     displayName: 'Test'
