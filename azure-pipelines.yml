@@ -20,16 +20,11 @@ variables:
   NODE_VERSION: '20.x'
 
 steps:
-  - task: NodeTool@0
-    displayName: 'Install Node.js'
-    inputs:
-      versionSpec: $(NODE_VERSION)
-
   - powershell: |
       Write-Host "Repo contents:"
       Get-ChildItem -Force
-      Write-Host "Node: $(node --version)"
-      Write-Host "npm:  $(npm --version)"
+      try { Write-Host "Node: $(node --version)" } catch { Write-Host "Node not installed on agent" }
+      try { Write-Host "npm:  $(npm --version)" } catch { Write-Host "npm not installed" }
     displayName: 'Diagnostics'
 
   - powershell: |
