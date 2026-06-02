@@ -17,16 +17,16 @@ steps:
   - checkout: self
     clean: false
 
-  - script: |
-      echo "=== Build Validation ==="
+  - bash: |
+      echo "=== Environment ==="
       node --version
       npm --version
-      echo "=== Installing ==="
-      call npm ci --prefer-offline
-      echo "=== Building ==="
-      call npm run build
-      echo "=== Testing ==="
-      call npm test -- --runInBand --forceExit
+      echo "=== Install ==="
+      npm ci --prefer-offline 2>/dev/null || npm ci
+      echo "=== Build ==="
+      npm run build
+      echo "=== Test ==="
+      npm test -- --runInBand --forceExit
       echo "=== PIPELINE PASSED ==="
     displayName: 'Build & Test'
     env:
