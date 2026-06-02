@@ -18,11 +18,12 @@ steps:
     clean: false
 
   - bash: |
+      set -e
       echo "=== Environment ==="
       node --version
       npm --version
       echo "=== Install ==="
-      npm ci --prefer-offline 2>/dev/null || npm ci
+      npm ci
       echo "=== Build ==="
       npm run build
       echo "=== Test ==="
