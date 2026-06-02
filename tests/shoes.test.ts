@@ -9,7 +9,7 @@ describe('Shoe Store API', () => {
       const res = await request(app).get('/');
       expect(res.status).toBe(200);
       expect(res.headers['content-type']).toContain('text/html');
-      expect(res.text).toContain('New Balance');
+      expect(res.text).toContain('Best Shoes on Earth');
       expect(res.text).toContain('Shop performance footwear');
     });
   });
@@ -51,6 +51,16 @@ describe('Shoe Store API', () => {
       expect(res.status).toBe(400);
       expect(res.body.success).toBe(false);
       expect(res.body.error).toContain('minPrice');
+    });
+
+    it('should include Nike shoes in the catalog', async () => {
+      const res = await request(app).get('/api/shoes?brand=Nike');
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.data.length).toBeGreaterThanOrEqual(3);
+      res.body.data.forEach((shoe: { brand: string }) => {
+        expect(shoe.brand).toBe('Nike');
+      });
     });
   });
 

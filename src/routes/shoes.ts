@@ -115,7 +115,55 @@ const seedData: ShoeProduct[] = [
   },
 ];
 
-const shoes: Map<string, ShoeProduct> = new Map(seedData.map((shoe) => [shoe.id, shoe]));
+const nikeShoes: ShoeProduct[] = [
+  {
+    id: 'shoe-nike-air-max',
+    name: 'Nike Air Max 270',
+    brand: 'Nike',
+    category: 'Running',
+    price: 159.99,
+    sizes: [7, 8, 9, 10, 11, 12],
+    imageUrl: createShoeImage('Nike Air Max 270', '#d63384', '#ff6bc1'),
+    imageUrls: [
+      createShoeImage('Nike Air Max 270', '#d63384', '#ff6bc1'),
+      createShoeImage('Nike Air Max 270', '#e91e8c', '#ff85d0'),
+    ],
+    description: 'Iconic Air Max cushioning with a sleek design for all-day comfort and style.',
+    featured: true,
+  },
+  {
+    id: 'shoe-nike-pegasus',
+    name: 'Nike Pegasus 41',
+    brand: 'Nike',
+    category: 'Running',
+    price: 139.99,
+    sizes: [7, 8, 9, 10, 11, 12, 13],
+    imageUrl: createShoeImage('Nike Pegasus 41', '#1a1a2e', '#e94560'),
+    imageUrls: [
+      createShoeImage('Nike Pegasus 41', '#1a1a2e', '#e94560'),
+      createShoeImage('Nike Pegasus 41', '#16213e', '#0f3460'),
+    ],
+    description: 'Trusted by runners worldwide with ReactX foam for an energized ride every mile.',
+    featured: true,
+  },
+  {
+    id: 'shoe-nike-dunk-low',
+    name: 'Nike Dunk Low Retro',
+    brand: 'Nike',
+    category: 'Lifestyle',
+    price: 114.99,
+    sizes: [6, 7, 8, 9, 10, 11, 12],
+    imageUrl: createShoeImage('Nike Dunk Low Retro', '#6d28d9', '#a855f7'),
+    imageUrls: [
+      createShoeImage('Nike Dunk Low Retro', '#6d28d9', '#a855f7'),
+      createShoeImage('Nike Dunk Low Retro', '#4c1d95', '#7c3aed'),
+    ],
+    description: 'Classic basketball heritage shoe reimagined as a streetwear staple.',
+    featured: false,
+  },
+];
+
+const shoes: Map<string, ShoeProduct> = new Map([...seedData, ...nikeShoes].map((shoe) => [shoe.id, shoe]));
 
 // GET /api/shoes - List all shoes with optional filters
 router.get('/', (req: Request, res: Response) => {
