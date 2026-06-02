@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Developer Agent — End-to-End Demo | Brandsafway</title>
+  <style>
+    :root {
+      --ado-blue: #0078d4;
+      --github-dark: #24292f;
+      --copilot-purple: #8957e5;
+      --success-green: #2da44e;
+      --pipeline-orange: #e3802b;
+      --merge-teal: #1a7f37;
+      --bg: #0d1117;
+      --card-bg: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --text-muted: #8b949e;
+      --glow: rgba(137, 87, 229, 0.15);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* Hero */
+    .hero {
+      text-align: center;
+      padding: 80px 20px 60px;
+      background: linear-gradient(180deg, rgba(137,87,229,0.08) 0%, transparent 100%);
+      position: relative;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(137,87,229,0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-badge {
+      display: inline-block;
+      padding: 6px 16px;
+      border: 1px solid var(--copilot-purple);
+      border-radius: 20px;
+      font-size: 0.85rem;
+      color: var(--copilot-purple);
+      margin-bottom: 24px;
+      background: rgba(137,87,229,0.08);
+    }
+    .hero h1 {
+      font-size: 2.8rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, #e6edf3, #8957e5);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero p {
+      font-size: 1.2rem;
+      color: var(--text-muted);
+      max-width: 700px;
+      margin: 0 auto 32px;
+    }
+    .hero-logos {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .hero-logos .logo-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .logo-icon {
+      width: 48px; height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+    .logo-icon.ado { background: var(--ado-blue); }
+    .logo-icon.gh { background: var(--github-dark); border: 1px solid var(--border); }
+    .logo-icon.copilot { background: var(--copilot-purple); }
+    .logo-label { font-size: 0.8rem; color: var(--text-muted); }
+    .connector { font-size: 1.5rem; color: var(--text-muted); }
+
+    /* Timeline */
+    .timeline-section {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 40px 20px 80px;
+    }
+    .section-title {
+      text-align: center;
+      font-size: 1.6rem;
+      margin-bottom: 48px;
+      color: var(--text);
+    }
+
+    .timeline {
+      position: relative;
+      padding-left: 60px;
+    }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 28px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(
+        180deg,
+        var(--ado-blue) 0%,
+        var(--ado-blue) 15%,
+        var(--github-dark) 25%,
+        var(--copilot-purple) 35%,
+        var(--copilot-purple) 65%,
+        var(--success-green) 75%,
+        var(--pipeline-orange) 85%,
+        var(--merge-teal) 100%
+      );
+    }
+
+    .step {
+      position: relative;
+      margin-bottom: 32px;
+      opacity: 0;
+      transform: translateY(30px);
+      animation: fadeInUp 0.5s ease forwards;
+    }
+    .step:nth-child(1)  { animation-delay: 0.1s; }
+    .step:nth-child(2)  { animation-delay: 0.2s; }
+    .step:nth-child(3)  { animation-delay: 0.3s; }
+    .step:nth-child(4)  { animation-delay: 0.4s; }
+    .step:nth-child(5)  { animation-delay: 0.5s; }
+    .step:nth-child(6)  { animation-delay: 0.6s; }
+    .step:nth-child(7)  { animation-delay: 0.7s; }
+    .step:nth-child(8)  { animation-delay: 0.8s; }
+    .step:nth-child(9)  { animation-delay: 0.9s; }
+    .step:nth-child(10) { animation-delay: 1.0s; }
+
+    @keyframes fadeInUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .step-dot {
+      position: absolute;
+      left: -38px;
+      top: 18px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 3px solid var(--bg);
+      z-index: 1;
+    }
+
+    .step-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+      cursor: default;
+    }
+    .step-card:hover {
+      transform: translateX(4px);
+      border-color: var(--copilot-purple);
+      box-shadow: 0 0 20px var(--glow);
+    }
+
+    .step-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .step-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .step-title {
+      font-size: 1.15rem;
+      font-weight: 600;
+    }
+    .step-owner {
+      margin-left: auto;
+      font-size: 0.75rem;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-weight: 500;
+      flex-shrink: 0;
+    }
+
+    .step-body {
+      margin-left: 44px;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+    .step-body ul {
+      list-style: none;
+      padding: 0;
+    }
+    .step-body li {
+      padding: 4px 0;
+      position: relative;
+      padding-left: 20px;
+    }
+    .step-body li::before {
+      content: '→';
+      position: absolute;
+      left: 0;
+      color: var(--copilot-purple);
+    }
+    .step-demo-note {
+      margin-top: 10px;
+      padding: 8px 12px;
+      background: rgba(137,87,229,0.06);
+      border-left: 3px solid var(--copilot-purple);
+      border-radius: 0 6px 6px 0;
+      font-size: 0.85rem;
+      color: #b392f0;
+    }
+
+    /* Color themes per phase */
+    .phase-ado .step-dot { background: var(--ado-blue); }
+    .phase-ado .step-number { background: rgba(0,120,212,0.15); color: var(--ado-blue); }
+    .phase-ado .step-owner { background: rgba(0,120,212,0.12); color: var(--ado-blue); }
+
+    .phase-github .step-dot { background: var(--text); }
+    .phase-github .step-number { background: rgba(230,237,243,0.1); color: var(--text); }
+    .phase-github .step-owner { background: rgba(230,237,243,0.08); color: var(--text); }
+
+    .phase-copilot .step-dot { background: var(--copilot-purple); }
+    .phase-copilot .step-number { background: rgba(137,87,229,0.15); color: var(--copilot-purple); }
+    .phase-copilot .step-owner { background: rgba(137,87,229,0.12); color: var(--copilot-purple); }
+
+    .phase-review .step-dot { background: var(--success-green); }
+    .phase-review .step-number { background: rgba(45,164,78,0.15); color: var(--success-green); }
+    .phase-review .step-owner { background: rgba(45,164,78,0.12); color: var(--success-green); }
+
+    .phase-pipeline .step-dot { background: var(--pipeline-orange); }
+    .phase-pipeline .step-number { background: rgba(227,128,43,0.15); color: var(--pipeline-orange); }
+    .phase-pipeline .step-owner { background: rgba(227,128,43,0.12); color: var(--pipeline-orange); }
+
+    .phase-deploy .step-dot { background: var(--merge-teal); }
+    .phase-deploy .step-number { background: rgba(26,127,55,0.15); color: var(--merge-teal); }
+    .phase-deploy .step-owner { background: rgba(26,127,55,0.12); color: var(--merge-teal); }
+
+    /* Architecture diagram */
+    .arch-section {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 40px 20px 80px;
+    }
+    .arch-diagram {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 40px;
+      text-align: center;
+    }
+    .arch-flow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin: 30px 0;
+    }
+    .arch-node {
+      padding: 14px 22px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      border: 1px solid;
+      white-space: nowrap;
+    }
+    .arch-node.ado {
+      background: rgba(0,120,212,0.12);
+      border-color: var(--ado-blue);
+      color: var(--ado-blue);
+    }
+    .arch-node.gh {
+      background: rgba(230,237,243,0.06);
+      border-color: var(--border);
+      color: var(--text);
+    }
+    .arch-node.copilot {
+      background: rgba(137,87,229,0.12);
+      border-color: var(--copilot-purple);
+      color: var(--copilot-purple);
+    }
+    .arch-node.pipeline {
+      background: rgba(227,128,43,0.12);
+      border-color: var(--pipeline-orange);
+      color: var(--pipeline-orange);
+    }
+    .arch-node.deploy {
+      background: rgba(26,127,55,0.12);
+      border-color: var(--merge-teal);
+      color: var(--merge-teal);
+    }
+    .arch-arrow {
+      color: var(--text-muted);
+      font-size: 1.2rem;
+    }
+
+    /* Integration cards */
+    .integrations {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 20px 80px;
+    }
+    .int-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+    }
+    .int-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+    }
+    .int-card h3 {
+      font-size: 1rem;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .int-card p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+    .int-card code {
+      background: rgba(137,87,229,0.1);
+      color: var(--copilot-purple);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 40px 20px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    footer a {
+      color: var(--copilot-purple);
+      text-decoration: none;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .hero h1 { font-size: 1.8rem; }
+      .timeline { padding-left: 40px; }
+      .step-body { margin-left: 0; }
+      .step-owner { display: none; }
+      .arch-flow { flex-direction: column; }
+      .arch-arrow { transform: rotate(90deg); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-badge">🤖 AI Developer Agent — End to End</div>
+    <h1>Build AI Developer Agent<br>End to End</h1>
+    <p>ADO work item to production deployment — fully autonomous, human-reviewed, pipeline-validated.</p>
+    <div class="hero-logos">
+      <div class="logo-item">
+        <div class="logo-icon ado">📋</div>
+        <span class="logo-label">Azure DevOps</span>
+      </div>
+      <span class="connector">→</span>
+      <div class="logo-item">
+        <div class="logo-icon gh">🐙</div>
+        <span class="logo-label">GitHub</span>
+      </div>
+      <span class="connector">→</span>
+      <div class="logo-item">
+        <div class="logo-icon copilot">🤖</div>
+        <span class="logo-label">GitHub Copilot</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Architecture Flow -->
+  <section class="arch-section">
+    <h2 class="section-title">Architecture Flow</h2>
+    <div class="arch-diagram">
+      <div class="arch-flow">
+        <div class="arch-node ado">ADO Board</div>
+        <span class="arch-arrow">→</span>
+        <div class="arch-node gh">GitHub Issue</div>
+        <span class="arch-arrow">→</span>
+        <div class="arch-node copilot">Copilot Agent</div>
+        <span class="arch-arrow">→</span>
+        <div class="arch-node gh">Pull Request</div>
+        <span class="arch-arrow">→</span>
+        <div class="arch-node pipeline">ADO Pipeline</div>
+        <span class="arch-arrow">→</span>
+        <div class="arch-node deploy">Deploy ✓</div>
+      </div>
+      <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 16px;">
+        Bidirectional linking via Azure Boards GitHub App + <code>AB#</code> syntax
+      </p>
+    </div>
+  </section>
+
+  <!-- Demo Steps Timeline -->
+  <section class="timeline-section">
+    <h2 class="section-title">Demo Walkthrough — 10 Steps</h2>
+
+    <div class="timeline">
+
+      <!-- Step 1 -->
+      <div class="step phase-ado">
+        <div class="step-dot"></div>
+        <div class="step-card">
+          <div class="step-header">
+            <span class="step-number">1</span>
+            <span class="step-title">ADO Work Item / Backlog Item Created</span>
+            <span class="step-owner">Azure DevOps</span>
+          </div>
+          <div class="step-body">
+            <ul>
+              <li>Open Azure Boards and create a new Product Backlog Item</li>
+              <li>Title: <strong>"Add health check endpoint to the API"</strong></li>
+              <li>Add acceptance criteria and description</li>
+              <li>Show the item on the Kanban board in "New" state</li>
+            </ul>
+            <div class="step-demo-note">💡 <strong>SAY:</strong> "This is where every developer workflow starts — a work item in your existing ADO backlog. Nothing changes about how your team plans work."</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step phase-github">
+        <div class="step-dot"></div>
+        <div class="step-card">
+          <div class="step-header">
+            <span class="step-number">2</span>
+            <span class="step-title">GitHub Issue Linked to ADO</span>
+            <span class="step-owner">GitHub + ADO</span>
+          </div>
+          <div class="step-body">
+            <ul>
+              <li><strong>Option A:</strong> Azure Boards GitHub App — auto-links issues and PRs</li>
+              <li><strong>Option B:</strong> GitHub Action syncs issue → ADO work item via REST API</li>
+              <li><strong>Option C:</strong> <code>AB#1234</code> syntax in commits/PRs for bidirectional linking</li>
+              <li>Show the GitHub issue with the ADO link in the description</li>
+            </ul>
+            <div class="step-demo-note">💡 <strong>SAY:</strong> "Three ways to connect — pick what fits your workflow. The Azure Boards App gives you zero-config bidirectional linking."</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="step phase-copilot">
+        <div class="step-dot"></div>
+        <div class="step-card">
+          <div class="step-header">
+            <span class="step-number">3</span>
+            <span class="step-title">Copilot Agent Assigned Issue</span>
+            <span class="step-owner">GitHub Copilot</span>
+          </div>
+          <div class="step-body">
+            <ul>
+              <li>Assign the GitHub issue to <code>@copilot</code></li>
+              <li>Copilot Coding Agent picks up the issue autonomously</li>
+              <li>Agent reads the issue, understands the codebase and conventions</li>
+              <li>Follows <code>.github/copilot-instructions.md</code> for project standards</li>
+            </ul>
+            <div class="step-demo-note">💡 <strong>SAY:</strong> "One click — assign to Copilot. It reads your codebase, understands your patterns, and gets to work. No prompting required."</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="step phase-copilot">
+        <div class="step-dot"></div>
+        <div class="step-card">
+          <div class="step-header">
+            <span class="step-number">4</span>
+            <span class="step-title">Agent Creates Branch</span>
+            <span class="step-owner">GitHub Copilot</span>
+          </div>
+          <div class="step-body">
+            <ul>
+              <li>Copilot automatically creates a <code>copilot/fix-{issue}</code> branch</li>
+              <li>Branch is based on <code>main</code> with latest code</li>
+              <li>Show the new branch appearing in the GitHub UI</li>
+            </ul>
+            <div class="step-demo-note">💡 <strong>SAY:</strong> "Standard git workflow — the agent creates an isolated branch just like any developer would."</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 5 -->
+      <div class="step phase-copilot">
+        <div class="step-dot"></div>
+        <div class="step-card">
+          <div class="step-header">
+            <span class="step-number">5</span>
+            <span class="step-title">Agent Develops Enhancement</span>
+            <span class="step-owner">GitHub Copilot</span>
+          </div>
+          <div class="step-body">
+            <ul>
+              <li>Copilot reads existing code patterns (<code>src/routes/items.ts</code>)</li>
+              <li>Implements the health check endpoint following conventions</li>
+              <li>Uses <code>ApiResponse&lt;T&gt;</code> wrapper type consistently</li>
+              <li>Registers new route in <code>src/routes/index.ts</code></li>
+            </ul>
+            <div class="step-demo-note">💡 <strong>SAY:</strong> "Notice how the agent follows your existing patterns — same response types, same route structure, same coding style."</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 6 -->
+      <div class="step phase-copilot">
+        <div class="step-dot"></div>
+        <div class="step-card">
+          <div class="step-header">
+            <span class="step-number">6</span>
+            <span class="step-title">Agent Commits Code + Tests</span>
+            <span class="step-owner">GitHub Copilot</span>
+          </div>
+          <div class="step-body">
+            <ul>
+              <li>Copilot writes matching test cases in <code>tests/health.test.ts</code></li>
+              <li>Tests follow the existing Jest + Supertest pattern</li>
+              <li>Commits with descriptive message referencing the issue</li>
+              <li>Includes both implementation and test files</li>
+            </ul>
+            <div class="step-demo-note">💡 <strong>SAY:</strong> "Code AND tests — the agent doesn't just implement, it validates its own work with tests that match your existing test patterns."</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 7 -->
+      <div class="step phase-copilot">
+        <div class="step-dot"></div>
+        <div class="step-card">
+          <div class="step-header">
+            <span class="step-number">7</span>
+            <span class="step-title">Agent Raises PR</span>
+            <span class="step-owner">GitHub Copilot</span>
+          </div>
+          <div class="step-body">
+            <ul>
+              <li>Copilot opens a draft Pull Request</li>
+              <li>PR description includes <code>AB#1234</code> to link back to ADO</li>
+              <li>Closes the linked GitHub issue reference</li>
+              <li>ADO work item automatically moves to "In Progress"</li>
+            </ul>
+            <div class="step-demo-note">💡 <strong>SAY:</strong> "The PR links back to ADO automatically — your project managers see progress in real-time on their board without leaving ADO."</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 8 -->
+      <div class="step phase-review">
+        <div class="step-dot"></div>
+        <div class="step-card">
+          <div class="step-header">
+            <span class="step-number">8</span>
+            <span class="step-title">Development Lead Reviews / Approves</span>
+            <span class="step-owner">Human Review</span>
+          </div>
+          <div class="step-body">
+            <ul>
+              <li>Dev lead reviews the PR — code quality, patterns, test coverage</li>
+              <li>Branch protection rules require at least 1 approval</li>
+              <li>Review comments can trigger Copilot to make revisions</li>
+              <li><strong>Human stays in the loop</strong> — AI proposes, humans approve</li>
+            </ul>
+            <div class="step-demo-note">💡 <strong>SAY:</strong> "This is the governance layer — no code reaches production without human review. The AI accelerates, humans validate."</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 9 -->
+      <div class="step phase-pipeline">
+        <div class="step-dot"></div>
+        <div class="step-card">
+          <div class="step-header">
+            <span class="step-number">9</span>
+            <span class="step-title">ADO Pipeline Validates</span>
+            <span class="step-owner">Azure Pipelines</span>
+          </div>
+          <div class="step-body">
+            <ul>
+              <li>Azure Pipelines triggers on the PR — build, lint, test</li>
+              <li>GitHub Actions CI also runs (Node 18.x + 20.x matrix)</li>
+              <li>Status checks appear in the PR — both must pass</li>
+              <li>Test results published back to ADO</li>
+            </ul>
+            <div class="step-demo-note">💡 <strong>SAY:</strong> "Your existing ADO pipelines validate the AI's work — same quality gates as human-written code. No shortcuts."</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 10 -->
+      <div class="step phase-deploy">
+        <div class="step-dot"></div>
+        <div class="step-card">
+          <div class="step-header">
+            <span class="step-number">10</span>
+            <span class="step-title">Merge + Deployment</span>
+            <span class="step-owner">Production</span>
+          </div>
+          <div class="step-body">
+            <ul>
+              <li>Merge the PR after approval + green checks</li>
+              <li>ADO pipeline triggers deployment to staging</li>
+              <li>ADO work item auto-transitions to <strong>"Done"</strong></li>
+              <li>Full traceability: work item → issue → branch → PR → deployment</li>
+            </ul>
+            <div class="step-demo-note">💡 <strong>SAY:</strong> "From backlog item to production — fully traced, fully validated, fully autonomous. What used to take a sprint takes minutes."</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Integration Methods -->
+  <section class="integrations">
+    <h2 class="section-title">Three Integration Methods</h2>
+    <div class="int-grid">
+      <div class="int-card">
+        <h3>🔗 Azure Boards GitHub App</h3>
+        <p>Install from GitHub Marketplace. Zero-config bidirectional linking between ADO work items and GitHub issues/PRs. Use <code>AB#1234</code> syntax anywhere.</p>
+      </div>
+      <div class="int-card">
+        <h3>⚡ GitHub Actions + ADO API</h3>
+        <p>Custom automation via <code>ado-sync.yml</code> workflow. Creates ADO work items when GitHub issues are labeled <code>sync-ado</code>. Full control over the sync logic.</p>
+      </div>
+      <div class="int-card">
+        <h3>🏷️ AB# Commit Syntax</h3>
+        <p>Include <code>AB#1234</code> in commit messages or PR descriptions. ADO automatically links and updates work item state. Works with any Git client.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <p>Brandsafway Demo — AI Developer Agent End-to-End</p>
+    <p style="margin-top: 8px;">Azure DevOps · GitHub · GitHub Copilot</p>
+  </footer>
+
+</body>
+</html>
