@@ -1,0 +1,64 @@
+name: Sync PR Merge to ADO Work Item
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main, master]
+
+permissions:
+  pull-requests: read
+  issues: read
+
+env:
+  ADO_ORG: https://dev.azure.com/brandsafway2
+  ADO_PROJECT: create_canvas
+  ADO_PAT: ${{ secrets.ADO_PAT }}
+
+jobs:
+  update-ado-on-merge:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true
+
+    steps:
+      - name: Update linked ADO work items to Done
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prBody = context.payload.pull_request.body || '';
+            const prTitle = context.payload.pull_request.title || '';
+
+            // Find AB#{id} references in PR body and title
+            const abPattern = /AB#(\d+)/gi;
+            const matches = [...prBody.matchAll(abPattern), ...prTitle.matchAll(abPattern)];
+            const workItemIds = [...new Set(matches.map(m => m[1]))];
+
+            if (workItemIds.length === 0) {
+              core.info('No AB# references found in PR — skipping ADO update');
+              return;
+            }
+
+            const adoOrg = process.env.ADO_ORG;
+            const adoProject = process.env.ADO_PROJECT;
+            const adoPat = process.env.ADO_PAT;
+            const headers = {
+              'Content-Type': 'application/json-patch+json',
+              'Authorization': `Basic ${Buffer.from(`:${adoPat}`).toString('base64')}`
+            };
+
+            for (const id of workItemIds) {
+              const body = [
+                { op: 'add', path: '/fields/System.State', value: 'Done' },
+                { op: 'add', path: '/fields/System.History', value: `Resolved by PR #${context.payload.pull_request.number}: ${context.payload.pull_request.html_url}` }
+              ];
+
+              const response = await fetch(
+                `${adoOrg}/${adoProject}/_apis/wit/workitems/${id}?api-version=7.1`,
+                { method: 'PATCH', headers, body: JSON.stringify(body) }
+              );
+
+              if (response.ok) {
+                core.info(`✅ Updated ADO work item AB#${id} to Done`);
+              } else {
+                core.warning(`Failed to update AB#${id}: ${response.status} ${response.statusText}`);
+              }
+            }

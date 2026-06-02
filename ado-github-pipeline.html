@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ADO ↔ GitHub Pipeline — Live Workflow</title>
+  <script>
+    (() => {
+      const param = new URLSearchParams(window.location.search).get("clawpilotTheme");
+      const theme =
+        param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
+  <style>
+    :root {
+      color-scheme: light;
+      --cp-bg: #f7f4ef;
+      --cp-bg-elevated: #fcfbf8;
+      --cp-surface: #ffffff;
+      --cp-surface-soft: #f5f5f5;
+      --cp-border: #dedede;
+      --cp-border-strong: #919191;
+      --cp-text: #242424;
+      --cp-text-muted: #5c5c5c;
+      --cp-text-soft: #6f6f6f;
+      --cp-accent: #b11f4b;
+      --cp-accent-hover: #9a1a41;
+      --cp-accent-soft: rgba(177, 31, 75, 0.08);
+      --cp-accent-fg: #ffffff;
+      --cp-success: #16a34a;
+      --cp-danger: #dc2626;
+      --cp-warning: #f59e0b;
+      --cp-link: #0078d4;
+      --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+      --cp-overlay: rgba(255, 255, 255, 0.8);
+      --cp-panel: rgba(255, 255, 255, 0.86);
+      --cp-panel-strong: rgba(255, 255, 255, 0.96);
+      --cp-sheen: rgba(255, 255, 255, 0.55);
+      --cp-highlight: rgba(177, 31, 75, 0.12);
+    }
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --cp-bg: #3d3b3a;
+      --cp-bg-elevated: #343231;
+      --cp-surface: #292929;
+      --cp-surface-soft: #2e2e2e;
+      --cp-border: #474747;
+      --cp-border-strong: #5f5f5f;
+      --cp-text: #dedede;
+      --cp-text-muted: #919191;
+      --cp-text-soft: #b0b0b0;
+      --cp-accent: #fd8ea1;
+      --cp-accent-hover: #fb7b91;
+      --cp-accent-soft: rgba(253, 142, 161, 0.14);
+      --cp-accent-fg: #1a1a1a;
+      --cp-success: #4ade80;
+      --cp-danger: #f87171;
+      --cp-warning: #fbbf24;
+      --cp-link: #4da6ff;
+      --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+      --cp-overlay: rgba(41, 41, 41, 0.88);
+      --cp-panel: rgba(41, 41, 41, 0.72);
+      --cp-panel-strong: rgba(41, 41, 41, 0.96);
+      --cp-sheen: rgba(255, 255, 255, 0.04);
+      --cp-highlight: rgba(253, 142, 161, 0.12);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--cp-bg);
+      color: var(--cp-text);
+      padding: 2rem;
+      min-height: 100vh;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .header h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .header p {
+      color: var(--cp-text-muted);
+      font-size: 0.95rem;
+    }
+
+    .pipeline-container {
+      max-width: 900px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .step {
+      display: flex;
+      gap: 1.5rem;
+      margin-bottom: 0rem;
+      position: relative;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+
+    .step.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .step-indicator {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: 0;
+      width: 48px;
+    }
+
+    .step-number {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.875rem;
+      background: var(--cp-surface);
+      border: 2px solid var(--cp-border);
+      color: var(--cp-text-muted);
+      transition: all 0.4s ease;
+      z-index: 1;
+    }
+
+    .step.active .step-number {
+      background: var(--cp-accent);
+      border-color: var(--cp-accent);
+      color: var(--cp-accent-fg);
+      box-shadow: 0 0 0 4px var(--cp-accent-soft);
+    }
+
+    .step.completed .step-number {
+      background: var(--cp-success);
+      border-color: var(--cp-success);
+      color: #fff;
+    }
+
+    .step-line {
+      width: 2px;
+      flex: 1;
+      min-height: 20px;
+      background: var(--cp-border);
+      transition: background 0.4s ease;
+    }
+
+    .step.completed .step-line {
+      background: var(--cp-success);
+    }
+
+    .step-card {
+      flex: 1;
+      background: var(--cp-surface);
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1rem;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .step.active .step-card {
+      border-color: var(--cp-accent);
+      box-shadow: 0 0 0 3px var(--cp-accent-soft);
+    }
+
+    .step.completed .step-card {
+      border-color: var(--cp-success);
+    }
+
+    .step-card h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.375rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .step-card p {
+      color: var(--cp-text-muted);
+      font-size: 0.875rem;
+      line-height: 1.5;
+    }
+
+    .step-card .badge {
+      display: inline-block;
+      padding: 0.125rem 0.5rem;
+      border-radius: 0.625rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .badge-ado {
+      background: rgba(0, 120, 212, 0.1);
+      color: var(--cp-link);
+    }
+
+    .badge-github {
+      background: var(--cp-accent-soft);
+      color: var(--cp-accent);
+    }
+
+    .badge-copilot {
+      background: rgba(111, 66, 193, 0.1);
+      color: #6f42c1;
+    }
+
+    html[data-theme="dark"] .badge-copilot {
+      background: rgba(179, 136, 255, 0.15);
+      color: #b388ff;
+    }
+
+    .badge-ci {
+      background: rgba(22, 163, 74, 0.1);
+      color: var(--cp-success);
+    }
+
+    .step-card .detail {
+      margin-top: 0.75rem;
+      padding: 0.75rem;
+      background: var(--cp-surface-soft);
+      border-radius: 0.625rem;
+      font-family: Consolas, "Courier New", Courier, monospace;
+      font-size: 0.8rem;
+      color: var(--cp-text-soft);
+      white-space: pre-wrap;
+    }
+
+    .controls {
+      text-align: center;
+      margin-top: 2rem;
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 0.625rem 1.25rem;
+      border-radius: 0.625rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--cp-border);
+      background: var(--cp-surface);
+      color: var(--cp-text);
+      transition: all 0.2s ease;
+    }
+
+    button:hover {
+      border-color: var(--cp-border-strong);
+      background: var(--cp-surface-soft);
+    }
+
+    button.primary {
+      background: var(--cp-accent);
+      color: var(--cp-accent-fg);
+      border-color: var(--cp-accent);
+    }
+
+    button.primary:hover {
+      background: var(--cp-accent-hover);
+      border-color: var(--cp-accent-hover);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .status-bar {
+      text-align: center;
+      margin-top: 1.5rem;
+      padding: 0.75rem 1.25rem;
+      background: var(--cp-surface);
+      border: 1px solid var(--cp-border);
+      border-radius: 0.625rem;
+      font-size: 0.85rem;
+      color: var(--cp-text-muted);
+    }
+
+    .status-bar .current-step {
+      color: var(--cp-accent);
+      font-weight: 600;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .step.active .step-number {
+      animation: pulse 2s infinite;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🔄 ADO ↔ GitHub Automated Pipeline</h1>
+    <p>End-to-end workflow from backlog item to deployed code</p>
+  </div>
+
+  <div class="pipeline-container">
+    <div class="step" data-step="1">
+      <div class="step-indicator">
+        <div class="step-number">1</div>
+        <div class="step-line"></div>
+      </div>
+      <div class="step-card">
+        <h3><span class="badge badge-ado">ADO</span> Create Backlog Item</h3>
+        <p>A Product Backlog Item is created in Azure DevOps (brandsafway2/create_canvas).</p>
+        <div class="detail">POST /_apis/wit/workitems/$Product%20Backlog%20Item
+→ Work Item ID: AB#42</div>
+      </div>
+    </div>
+
+    <div class="step" data-step="2">
+      <div class="step-indicator">
+        <div class="step-number">2</div>
+        <div class="step-line"></div>
+      </div>
+      <div class="step-card">
+        <h3><span class="badge badge-github">GitHub</span> Issue Created & Linked</h3>
+        <p>A GitHub issue is created with the <code>sync-ado</code> label. The <code>ado-sync.yml</code> workflow links it to the ADO work item via <code>AB#</code> reference.</p>
+        <div class="detail">Issue #2: "Add health check endpoint at GET /api/health"
+Labels: [copilot, sync-ado]
+→ Comment: ✅ Azure DevOps work item created: AB#42</div>
+      </div>
+    </div>
+
+    <div class="step" data-step="3">
+      <div class="step-indicator">
+        <div class="step-number">3</div>
+        <div class="step-line"></div>
+      </div>
+      <div class="step-card">
+        <h3><span class="badge badge-copilot">Copilot</span> Agent Assigned</h3>
+        <p>The <code>assign-copilot.yml</code> workflow detects the <code>copilot</code> label and assigns the Copilot Coding Agent to the issue.</p>
+        <div class="detail">Trigger: issues.labeled → "copilot"
+Action: github.issues.addAssignees(["Copilot"])
+→ 🤖 Copilot Coding Agent assigned</div>
+      </div>
+    </div>
+
+    <div class="step" data-step="4">
+      <div class="step-indicator">
+        <div class="step-number">4</div>
+        <div class="step-line"></div>
+      </div>
+      <div class="step-card">
+        <h3><span class="badge badge-copilot">Copilot</span> Creates Branch & Develops</h3>
+        <p>Copilot reads <code>.github/copilot-instructions.md</code> and <code>copilot-setup.yml</code>, creates a branch, writes code and tests following project conventions.</p>
+        <div class="detail">Branch: copilot/issue-2-health-endpoint
+Files:  src/routes/health.ts (new)
+        src/routes/index.ts (modified)
+        tests/health.test.ts (new)
+Runs:   npm ci → npm run build → npm test ✓</div>
+      </div>
+    </div>
+
+    <div class="step" data-step="5">
+      <div class="step-indicator">
+        <div class="step-number">5</div>
+        <div class="step-line"></div>
+      </div>
+      <div class="step-card">
+        <h3><span class="badge badge-copilot">Copilot</span> Opens Pull Request</h3>
+        <p>The agent creates a PR referencing both the GitHub issue and the ADO work item.</p>
+        <div class="detail">PR #3: "Add health check endpoint"
+Body: "Closes #2 | Resolves AB#42"
+Branch: copilot/issue-2-health-endpoint → main</div>
+      </div>
+    </div>
+
+    <div class="step" data-step="6">
+      <div class="step-indicator">
+        <div class="step-number">6</div>
+        <div class="step-line"></div>
+      </div>
+      <div class="step-card">
+        <h3><span class="badge badge-ci">CI</span> GitHub Actions Validates</h3>
+        <p>The <code>ci.yml</code> workflow runs lint, build, and tests on Node 18.x and 20.x.</p>
+        <div class="detail">Jobs: build-and-test (matrix: [18.x, 20.x])
+Steps: checkout → npm ci → lint ✓ → build ✓ → test ✓
+Status: ✅ All checks passed</div>
+      </div>
+    </div>
+
+    <div class="step" data-step="7">
+      <div class="step-indicator">
+        <div class="step-number">7</div>
+        <div class="step-line"></div>
+      </div>
+      <div class="step-card">
+        <h3><span class="badge badge-github">GitHub</span> Review & Merge</h3>
+        <p>Copilot Agent addresses review comments. Once approved, the PR is merged to <code>main</code>.</p>
+        <div class="detail">Review: Approved by reviewer
+Merge: Squash and merge → main
+Issue #2: Automatically closed</div>
+      </div>
+    </div>
+
+    <div class="step" data-step="8">
+      <div class="step-indicator">
+        <div class="step-number">8</div>
+        <div class="step-line"></div>
+      </div>
+      <div class="step-card">
+        <h3><span class="badge badge-ado">ADO</span> Pipeline Validates Build</h3>
+        <p>The Azure DevOps pipeline (<code>azure-pipelines.yml</code>) triggers on merge, running full build, test, and deploy stages.</p>
+        <div class="detail">Stage: Build & Test
+  → Node.js install → npm ci → lint → build → test
+  → Publish JUnit results
+Stage: Deploy to Staging
+  → Environment: staging ✓</div>
+      </div>
+    </div>
+
+    <div class="step" data-step="9">
+      <div class="step-indicator">
+        <div class="step-number">9</div>
+      </div>
+      <div class="step-card">
+        <h3><span class="badge badge-ado">ADO</span> Work Item → Done</h3>
+        <p>The <code>ado-pr-status.yml</code> workflow detects the <code>AB#42</code> reference in the merged PR and updates the ADO work item to <strong>Done</strong>.</p>
+        <div class="detail">Trigger: pull_request.closed (merged=true)
+Match: AB#42 in PR body
+PATCH: /fields/System.State → "Done"
+→ ✅ Work item AB#42 resolved</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button id="btn-reset">⟲ Reset</button>
+    <button id="btn-step" class="primary">▶ Next Step</button>
+    <button id="btn-auto">⏩ Auto Play</button>
+  </div>
+
+  <div class="status-bar">
+    <span id="status-text">Click <strong>Next Step</strong> to walk through the pipeline</span>
+  </div>
+
+  <script>
+    const steps = document.querySelectorAll('.step');
+    let currentStep = -1;
+    let autoInterval = null;
+
+    const statusMessages = [
+      'Pipeline ready — click Next Step to begin',
+      '📋 ADO backlog item created in brandsafway2/create_canvas',
+      '🔗 GitHub issue created with sync-ado label, linked to ADO',
+      '🤖 Copilot Coding Agent auto-assigned via copilot label',
+      '💻 Agent developing: branch created, writing code & tests...',
+      '📝 PR opened with AB# reference and issue close syntax',
+      '✅ GitHub CI passed — lint, build, tests green on 18.x & 20.x',
+      '🔀 PR approved and merged to main',
+      '🏗️ ADO pipeline running: build → test → deploy to staging',
+      '🎉 Complete! ADO work item marked Done — full cycle finished'
+    ];
+
+    function showStep(index) {
+      steps.forEach((step, i) => {
+        step.classList.remove('active');
+        if (i < index) {
+          step.classList.add('visible', 'completed');
+        } else if (i === index) {
+          step.classList.add('visible', 'active');
+        } else {
+          step.classList.remove('visible', 'completed');
+        }
+      });
+    }
+
+    function updateStatus() {
+      const statusEl = document.getElementById('status-text');
+      const msg = statusMessages[currentStep + 1] || statusMessages[statusMessages.length - 1];
+      statusEl.innerHTML = msg;
+    }
+
+    document.getElementById('btn-step').addEventListener('click', () => {
+      if (currentStep < steps.length - 1) {
+        currentStep++;
+        showStep(currentStep);
+        updateStatus();
+      }
+      if (currentStep >= steps.length - 1) {
+        document.getElementById('btn-step').disabled = true;
+      }
+    });
+
+    document.getElementById('btn-reset').addEventListener('click', () => {
+      clearInterval(autoInterval);
+      autoInterval = null;
+      currentStep = -1;
+      steps.forEach(s => s.classList.remove('visible', 'active', 'completed'));
+      document.getElementById('btn-step').disabled = false;
+      document.getElementById('btn-auto').disabled = false;
+      updateStatus();
+    });
+
+    document.getElementById('btn-auto').addEventListener('click', () => {
+      if (autoInterval) return;
+      document.getElementById('btn-auto').disabled = true;
+      autoInterval = setInterval(() => {
+        if (currentStep < steps.length - 1) {
+          currentStep++;
+          showStep(currentStep);
+          updateStatus();
+        } else {
+          clearInterval(autoInterval);
+          autoInterval = null;
+          document.getElementById('btn-step').disabled = true;
+        }
+      }, 1800);
+    });
+
+    updateStatus();
+  </script>
+</body>
+</html>

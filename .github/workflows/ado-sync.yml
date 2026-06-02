@@ -8,9 +8,9 @@ permissions:
   issues: write
 
 env:
-  ADO_ORG: https://dev.azure.com/YOUR_ORG     # Replace with your ADO org URL
-  ADO_PROJECT: YOUR_PROJECT                      # Replace with your ADO project name
-  ADO_PAT: ${{ secrets.ADO_PAT }}               # Store PAT in GitHub Secrets
+  ADO_ORG: https://dev.azure.com/brandsafway2
+  ADO_PROJECT: create_canvas
+  ADO_PAT: ${{ secrets.ADO_PAT }}
 
 jobs:
   sync-to-ado:
