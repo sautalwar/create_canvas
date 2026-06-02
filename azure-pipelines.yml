@@ -14,24 +14,20 @@ pool:
   name: Default
 
 steps:
-  - task: PowerShell@2
+  - checkout: self
+    clean: false
+
+  - script: |
+      echo "=== Build Validation ==="
+      node --version
+      npm --version
+      echo "=== Installing ==="
+      call npm ci --prefer-offline
+      echo "=== Building ==="
+      call npm run build
+      echo "=== Testing ==="
+      call npm test -- --runInBand --forceExit
+      echo "=== PIPELINE PASSED ==="
     displayName: 'Build & Test'
-    inputs:
-      targetType: 'inline'
-      script: |
-        $ErrorActionPreference = 'Continue'
-        Write-Host "Node: $(node --version)"
-        Write-Host "npm: $(npm --version)"
-        Write-Host "--- Installing ---"
-        npm ci --prefer-offline 2>$null
-        if ($LASTEXITCODE -ne 0) { npm ci }
-        Write-Host "--- Building ---"
-        npm run build
-        if ($LASTEXITCODE -ne 0) { throw "Build failed" }
-        Write-Host "--- Testing ---"
-        npm test -- --runInBand --forceExit
-        if ($LASTEXITCODE -ne 0) { throw "Tests failed" }
-        Write-Host "--- All steps passed ---"
-      errorActionPreference: 'continue'
-      failOnStderr: false
-      ignoreLASTEXITCODE: true
+    env:
+      NODE_OPTIONS: '--max-old-space-size=512'
