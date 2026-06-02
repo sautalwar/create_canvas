@@ -49,7 +49,7 @@ steps:
 
   - powershell: |
       if ((Test-Path package.json) -and (npm run | Select-String -Quiet '^  test')) {
-        npm test
+        npm test -- --runInBand
       } else {
         Write-Host "No 'test' script yet -> skipping"
       }
