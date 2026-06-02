@@ -17,13 +17,24 @@ steps:
   - checkout: self
     clean: false
 
-  - task: CmdLine@2
-    displayName: 'Build & Test'
+  - task: UseNode@1
     inputs:
-      script: |
-        node --version
-        npm --version
-        call npm ci
-        call npm run build
-        call npm test -- --runInBand --forceExit
-      failOnStderr: false
+      version: '20.x'
+    continueOnError: true
+
+  - task: Npm@1
+    displayName: 'Install dependencies'
+    inputs:
+      command: 'ci'
+
+  - task: Npm@1
+    displayName: 'Build'
+    inputs:
+      command: 'custom'
+      customCommand: 'run build'
+
+  - task: Npm@1
+    displayName: 'Test'
+    inputs:
+      command: 'custom'
+      customCommand: 'test -- --runInBand --forceExit'
