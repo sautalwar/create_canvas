@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Stride Studio | Performance Shoe Store</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header class="hero">
+      <nav class="topbar">
+        <div class="brand">Stride Studio</div>
+        <a class="cart-link" href="#cart">Cart <span id="cart-count">0</span></a>
+      </nav>
+      <div class="hero-content">
+        <div>
+          <p class="eyebrow">New season arrivals</p>
+          <h1>Shop performance footwear built for every stride.</h1>
+          <p class="hero-copy">
+            Discover responsive runners, court-ready trainers, and lifestyle essentials from
+            modern brands.
+          </p>
+          <div class="hero-actions">
+            <a class="button primary" href="#catalog">Browse catalog</a>
+            <a class="button secondary" href="#featured">Featured picks</a>
+          </div>
+        </div>
+        <div class="hero-card">
+          <p>Fast delivery</p>
+          <strong>Free shipping on orders over $150</strong>
+        </div>
+      </div>
+    </header>
+
+    <main class="page-shell">
+      <section id="featured" class="section">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Featured shoes</p>
+            <h2>Top picks for training, travel, and daily wear.</h2>
+          </div>
+          <div id="category-nav" class="category-nav"></div>
+        </div>
+        <div id="featured-grid" class="product-grid"></div>
+      </section>
+
+      <section id="catalog" class="section layout">
+        <aside class="filters">
+          <h3>Filter catalog</h3>
+          <label>
+            Brand
+            <select id="brand-filter">
+              <option value="">All brands</option>
+            </select>
+          </label>
+          <label>
+            Size
+            <select id="size-filter">
+              <option value="">All sizes</option>
+            </select>
+          </label>
+          <label>
+            Minimum price
+            <input id="min-price-filter" type="number" min="0" step="1" placeholder="0" />
+          </label>
+          <label>
+            Maximum price
+            <input id="max-price-filter" type="number" min="0" step="1" placeholder="200" />
+          </label>
+          <button id="apply-filters" class="button primary" type="button">Apply filters</button>
+        </aside>
+
+        <div class="catalog-panel">
+          <div class="section-heading compact">
+            <div>
+              <p class="eyebrow">Product catalog</p>
+              <h2>Find your next pair.</h2>
+            </div>
+            <p id="catalog-summary" class="catalog-summary">Loading shoes…</p>
+          </div>
+          <div id="catalog-grid" class="product-grid"></div>
+        </div>
+      </section>
+
+      <section id="product-detail" class="section detail-section"></section>
+
+      <section id="cart" class="section">
+        <div class="section-heading compact">
+          <div>
+            <p class="eyebrow">Shopping cart</p>
+            <h2>Your selected shoes.</h2>
+          </div>
+          <p id="cart-subtotal" class="catalog-summary">$0.00</p>
+        </div>
+        <div id="cart-items" class="cart-list"></div>
+      </section>
+    </main>
+
+    <script src="/app.js"></script>
+  </body>
+</html>

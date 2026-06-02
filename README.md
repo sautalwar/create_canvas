@@ -1,6 +1,6 @@
-# Brandsafway Inventory API
+# Brandsafway Inventory API & Shoe Store
 
-A Node.js/TypeScript REST API for inventory management — built to demonstrate the end-to-end GitHub + Azure DevOps developer workflow.
+A Node.js/TypeScript app for inventory management plus a responsive shoe store storefront served from `/public`.
 
 ## Quick Start
 
@@ -21,6 +21,11 @@ npm run dev      # Development mode with ts-node
 | POST | `/api/items` | Create a new item |
 | PUT | `/api/items/:id` | Update an item |
 | DELETE | `/api/items/:id` | Delete an item |
+| GET | `/api/shoes` | List shoe products with brand/size/price filters |
+| GET | `/api/shoes/:id` | Get a single shoe product |
+| GET | `/api/cart` | View shopping cart contents |
+| POST | `/api/cart` | Add a shoe size to the shopping cart |
+| DELETE | `/api/cart/:itemId` | Remove a cart item |
 
 ## Tech Stack
 

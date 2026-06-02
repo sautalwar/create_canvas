@@ -26,3 +26,40 @@ export interface ApiResponse<T> {
   data?: T;
   error?: string;
 }
+
+export interface ShoeProduct {
+  id: string;
+  name: string;
+  brand: string;
+  category: string;
+  price: number;
+  sizes: number[];
+  imageUrl: string;
+  imageUrls: string[];
+  description: string;
+  featured: boolean;
+}
+
+export interface AddToCartRequest {
+  shoeId: string;
+  size: number;
+  quantity: number;
+}
+
+export interface CartItem {
+  id: string;
+  shoeId: string;
+  name: string;
+  brand: string;
+  size: number;
+  quantity: number;
+  price: number;
+  imageUrl: string;
+  lineTotal: number;
+}
+
+export interface CartSummary {
+  items: CartItem[];
+  itemCount: number;
+  subtotal: number;
+}
