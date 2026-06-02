@@ -14,18 +14,24 @@ pool:
   name: Default
 
 steps:
-  - script: node --version && npm --version
-    displayName: 'Environment Check'
-    failOnStderr: false
-
-  - script: npm ci --prefer-offline
-    displayName: 'Install dependencies'
-    failOnStderr: false
-
-  - script: npm run build
-    displayName: 'Build'
-    failOnStderr: false
-
-  - script: npm test -- --runInBand --forceExit
-    displayName: 'Test'
-    failOnStderr: false
+  - task: PowerShell@2
+    displayName: 'Build & Test'
+    inputs:
+      targetType: 'inline'
+      script: |
+        $ErrorActionPreference = 'Continue'
+        Write-Host "Node: $(node --version)"
+        Write-Host "npm: $(npm --version)"
+        Write-Host "--- Installing ---"
+        npm ci --prefer-offline 2>$null
+        if ($LASTEXITCODE -ne 0) { npm ci }
+        Write-Host "--- Building ---"
+        npm run build
+        if ($LASTEXITCODE -ne 0) { throw "Build failed" }
+        Write-Host "--- Testing ---"
+        npm test -- --runInBand --forceExit
+        if ($LASTEXITCODE -ne 0) { throw "Tests failed" }
+        Write-Host "--- All steps passed ---"
+      errorActionPreference: 'continue'
+      failOnStderr: false
+      ignoreLASTEXITCODE: true
