@@ -17,18 +17,13 @@ steps:
   - checkout: self
     clean: false
 
-  - bash: |
-      set -e
-      echo "=== Environment ==="
-      node --version
-      npm --version
-      echo "=== Install ==="
-      npm ci
-      echo "=== Build ==="
-      npm run build
-      echo "=== Test ==="
-      npm test -- --runInBand --forceExit
-      echo "=== PIPELINE PASSED ==="
+  - task: CmdLine@2
     displayName: 'Build & Test'
-    env:
-      NODE_OPTIONS: '--max-old-space-size=512'
+    inputs:
+      script: |
+        node --version
+        npm --version
+        call npm ci
+        call npm run build
+        call npm test -- --runInBand --forceExit
+      failOnStderr: false
