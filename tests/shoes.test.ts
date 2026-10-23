@@ -9,7 +9,7 @@ describe('Shoe Store API', () => {
       const res = await request(app).get('/');
       expect(res.status).toBe(200);
       expect(res.headers['content-type']).toContain('text/html');
-      expect(res.text).toContain('Best Shoes on Earth');
+      expect(res.text).toContain('Sole Supreme');
       expect(res.text).toContain('Shop performance footwear');
     });
   });
